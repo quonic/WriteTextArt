@@ -1,26 +1,26 @@
 @{
-    PSDependOptions = @{
-        Target = '$DependencyFolder'
+    PSDependOptions   = @{
+        Target    = '$DependencyFolder'
         AddToPath = $True
     }
-    PSScriptAnalyzer = @{
+    PSScriptAnalyzer  = @{
         version = '1.18.3'
-        source = 'PSGalleryModule'
+        source  = 'PSGalleryModule'
     }
-    PlatyPS = @{
+    PlatyPS           = @{
         version = '0.14.0'
-        source = 'PSGalleryModule'
+        source  = 'PSGalleryModule'
     }
     'Powershell-YAML' = @{
         version = '0.4.1'
-        source = 'PSGalleryModule'
+        source  = 'PSGalleryModule'
     }
-    PSCodeHealth = @{
+    PSCodeHealth      = @{
         version = '0.2.26'
-        source = 'PSGalleryModule'
+        source  = 'PSGalleryModule'
     }
-    ModuleBuildTools = @{
+    ModuleBuildTools  = @{
         version = '0.0.1'
-        source = 'PSGalleryModule'
+        source  = 'PSGalleryModule'
     }
 }

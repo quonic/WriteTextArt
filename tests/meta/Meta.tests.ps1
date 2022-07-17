@@ -6,13 +6,13 @@ Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath 'MetaFixers.psm1')
 
 $projectRoot = $ENV:BuildRoot
 
-if(-not $projectRoot) {
+if (-not $projectRoot) {
     $projectRoot = $PSScriptRoot
 }
 
 Describe 'Text files formatting' -Tags @('MetaTest') {
     $allTextFiles = Get-TextFilesList -root $projectRoot -Extension @('.gitignore', '.gitattributes', '.ps1', '.psm1', '.psd1', '.cmd', '.mof')
-    $allTextFiles = $allTextFiles | Where-Object {$_.FullName -notlike '*\release\*'} | where-Object {$_.FullName -notlike '*\plugins\*'}  | where-Object {$_.FullName -notlike '*\build\*'}
+    $allTextFiles = $allTextFiles | Where-Object { $_.Directory -notlike '*\release\*' } | Where-Object { $_.Directory -notlike '*\plugins\*' }  | Where-Object { $_.Directory -notlike '*\build\*' }
     Context 'Files encoding' {
         It "Doesn't use Unicode encoding" {
             $unicodeFilesCount = 0
@@ -22,7 +22,7 @@ Describe 'Text files formatting' -Tags @('MetaTest') {
                     Write-Warning "File $($_.FullName) contains 0x00 bytes. It's probably uses Unicode and need to be converted to UTF-8."
                 }
             }
-            $unicodeFilesCount | Should Be 0
+            $unicodeFilesCount | Should -Be 0
         }
     }
 
@@ -36,7 +36,7 @@ Describe 'Text files formatting' -Tags @('MetaTest') {
                     $totalTabsCount++
                 }
             }
-            $totalTabsCount | Should Be 0
+            $totalTabsCount | Should -Be 0
         }
     }
 }

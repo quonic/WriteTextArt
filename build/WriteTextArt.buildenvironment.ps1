@@ -11,59 +11,59 @@ param (
 # check for an exported .xml file with persistent settings for any run thereafter
 if ((Get-Variable 'BuildEnv' -ErrorAction:SilentlyContinue) -eq $null) {
     $Script:BuildEnv = New-Object -TypeName PSObject -Property @{
-        FirstRun = $True
-        Force = $False
-        ForceInstallModule = $False
-        Encoding = 'utf8'
-        ModuleToBuild = 'WriteTextArt'
-        ModuleVersion = '0.0.1'
-        ModuleWebsite = 'https://github.com/quonic/WriteTextArt'
-        ModuleCopyright = "(c) $((get-date).Year.ToString()) Jim Caten. All rights reserved."
-        ModuleLicenseURI = 'https://github.com/quonic/WriteTextArt/LICENSE.md'
-        ModuleTags = 'Write' -split ','
-        ModuleAuthor = 'Jim Caten'
-        ModuleDescription = 'A collection of cmdlets to spice up your text output'
+        FirstRun                           = $True
+        Force                              = $False
+        ForceInstallModule                 = $False
+        Encoding                           = 'utf8'
+        ModuleToBuild                      = 'WriteTextArt'
+        ModuleVersion                      = '0.0.1'
+        ModuleWebsite                      = 'https://github.com/quonic/WriteTextArt'
+        ModuleCopyright                    = "(c) $((get-date).Year.ToString()) Jim Caten. All rights reserved."
+        ModuleLicenseURI                   = 'https://github.com/quonic/WriteTextArt/LICENSE.md'
+        ModuleTags                         = 'Write' -split ','
+        ModuleAuthor                       = 'Jim Caten'
+        ModuleDescription                  = 'A collection of cmdlets to spice up your text output'
 
         # Options - These affect how your build will be run.
-        OptionAnalyzeCode = $True
-        OptionCodeHealthReport = $True
-        OptionCombineFiles = $TRUE
-        OptionTranscriptEnabled = $false
-        OptionTranscriptLogFile = 'BuildTranscript.Log'
+        OptionAnalyzeCode                  = $True
+        OptionCodeHealthReport             = $True
+        OptionCombineFiles                 = $TRUE
+        OptionTranscriptEnabled            = $false
+        OptionTranscriptLogFile            = 'BuildTranscript.Log'
 
         # PlatyPS has been the cause of most of my build failures. This can help you isolate which function's CBH is causing you grief.
-        OptionRunPlatyPSVerbose = $false
+        OptionRunPlatyPSVerbose            = $false
 
         # If you want to prescan and fail a build upon finding any proprietary strings
         # enable this option and define some strings.
-        OptionSanitizeSensitiveTerms = $False
-        OptionSensitiveTerms = @($env:username, $env:userdomain, $env:userdnsdomain) | Where {$null -ne $_}
-        OptionSensitiveTermsInitialized = $false
+        OptionSanitizeSensitiveTerms       = $False
+        OptionSensitiveTerms               = @($env:username, $env:userdomain, $env:userdnsdomain) | Where { $null -ne $_ }
+        OptionSensitiveTermsInitialized    = $false
 
         # If you want to update your current module build version automatically
         # after a successful psgallery publish set this to $true
         OptionUpdateVersionAfterPublishing = $True
 
         # Additional paths in the source module which should be copied over to the final build release
-        AdditionalModulePaths = @('plugins')
+        AdditionalModulePaths              = @('plugins')
 
         # Generate a yml file in the root folder of this project for readthedocs.org integration
-        OptionGenerateReadTheDocs = $True
+        OptionGenerateReadTheDocs          = $True
         # Most of the following options you probably don't need to change
-        BaseSourceFolder = 'src'               # Base source path
-        PublicFunctionSource = "src\public"    # Public functions (to be exported by file name as the function name)
-        PrivateFunctionSource = "src\private"  # Private function source.
-        OtherModuleSource = "src\other"        # Other module source.
-        BaseReleaseFolder = 'release'          # Releases directory.
-        BuildToolFolder = 'build'              # Build tool path.
-        BuildReportsFolder = 'build\reports'   # Location where PSCodeHealth stores its reports.
-        ScratchFolder = 'temp'                 # Scratch path - this is where all our scratch work occurs. It will be cleared out at every run.
-        FunctionTemplates = "src\templates"    # Location of function template files (*.tem)
+        BaseSourceFolder                   = 'src'               # Base source path
+        PublicFunctionSource               = "src\public"    # Public functions (to be exported by file name as the function name)
+        PrivateFunctionSource              = "src\private"  # Private function source.
+        OtherModuleSource                  = "src\other"        # Other module source.
+        BaseReleaseFolder                  = 'release'          # Releases directory.
+        BuildToolFolder                    = 'build'              # Build tool path.
+        BuildReportsFolder                 = 'build\reports'   # Location where PSCodeHealth stores its reports.
+        ScratchFolder                      = 'temp'                 # Scratch path - this is where all our scratch work occurs. It will be cleared out at every run.
+        FunctionTemplates                  = "src\templates"    # Location of function template files (*.tem)
 
         # If you will be publishing to the PowerShell Gallery you will need a Nuget API key (can get from the website)
         # You should NOT enter this key here but rather manually enter it in the WriteTextArt.buildenvironment.json file with: Set-MBBuildEnvironment -NugetAPIKey '<key>'
 
-        NugetAPIKey  = ''
+        NugetAPIKey                        = ''
     }
 
     ########################################

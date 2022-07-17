@@ -86,7 +86,7 @@ task LoadRequiredModules {
     $PSDependFolder = $(Join-Path $Script:BuildEnv.BuildToolFolder 'dependencies\PSDepend')
     $PSDependBuildFile = $(Join-Path $PSDependFolder 'build.depend.psd1')
     Invoke-PSDepend -Path $PSDependBuildFile -Force
-    $Script:PSDependBuildModules = Invoke-PSDepend -Path $PSDependBuildFile -Test | Select-Object Version,DependencyName,DependencyType
+    $Script:PSDependBuildModules = Invoke-PSDepend -Path $PSDependBuildFile -Test | Select-Object Version, DependencyName, DependencyType
     Invoke-PSDepend -Path $PSDependBuildFile -Import -Force
     $Script:PSDependBuildModules | ForEach-Object {
         Write-Description White "Installed version $($_.Version) of $($_.DependencyName) from $($_.DependencyType)" -Level 2
@@ -124,7 +124,7 @@ task VersionCheck LoadModuleManifest, {
 }
 
 #Synopsis: Validate script requirements are met, load required modules, load project manifest and module.
-task Configure ValidateRequirements, PreBuildTasks, LoadRequiredModules, LoadModuleManifest, LoadModule, VersionCheck,  {
+task Configure ValidateRequirements, PreBuildTasks, LoadRequiredModules, LoadModuleManifest, LoadModule, VersionCheck, {
     # If we made it this far then we are configured!
     Write-Description White 'Configuring build environment' -accent
 }
@@ -132,7 +132,7 @@ task Configure ValidateRequirements, PreBuildTasks, LoadRequiredModules, LoadMod
 
 #region Helpers
 #Synopsis: Create a CodeHealthReport of your existing code
-task CodeHealthReport -if {$Script:BuildEnv.OptionCodeHealthReport} ValidateRequirements, LoadRequiredModules, {
+task CodeHealthReport -if { $Script:BuildEnv.OptionCodeHealthReport } ValidateRequirements, LoadRequiredModules, {
     $BuildReportsFolder = Join-Path $BuildRoot $(Join-Path $Script:BuildEnv.BuildReportsFolder $Script:BuildEnv.ModuleVersion)
     Write-Description White "Creating a prebuild code health report of your public functions to $($BuildReportsFolder)" -accent
 
@@ -142,7 +142,7 @@ task CodeHealthReport -if {$Script:BuildEnv.OptionCodeHealthReport} ValidateRequ
 
     Write-Description White 'Creating a code health report of your public functions' -level 2
     $CodeHealthScanPathPublic = Join-Path $BuildRoot $Script:BuildEnv.PublicFunctionSource
-    $CodeHealthScanTestPathPublic = $CodeHealthScanPathPublic -replace  'src', 'tests\\unit'
+    $CodeHealthScanTestPathPublic = $CodeHealthScanPathPublic -replace 'src', 'tests\\unit'
     $CodeHealthReportPublic = Join-Path $BuildReportsFolder 'CodeHealthReport-Public.html'
     Invoke-PSCodeHealth -Path $CodeHealthScanPathPublic -HtmlReportPath $CodeHealthReportPublic -TestsPath $CodeHealthScanTestPathPublic
 
@@ -152,7 +152,7 @@ task CodeHealthReport -if {$Script:BuildEnv.OptionCodeHealthReport} ValidateRequ
 
     Write-Description White 'Creating a code health report of your private functions' -level 2
     $CodeHealthScanPathPrivate = Join-Path $BuildRoot $Script:BuildEnv.PrivateFunctionSource
-    $CodeHealthScanTestPathPrivate = $CodeHealthScanPathPrivate -replace  'src', 'tests\\unit'
+    $CodeHealthScanTestPathPrivate = $CodeHealthScanPathPrivate -replace 'src', 'tests\\unit'
     $CodeHealthReportPrivate = Join-Path $BuildReportsFolder 'CodeHealthReport-Private.html'
     Invoke-PSCodeHealth -Path $CodeHealthScanPathPrivate -HtmlReportPath $CodeHealthReportPrivate -TestsPath $CodeHealthScanTestPathPrivate
 
@@ -191,7 +191,7 @@ task GetPublicFunctions {
     Write-Description White 'Parsing for public (exported) function names' -accent
     $Exported = @()
     Get-ChildItem (Join-Path $BuildRoot $Script:BuildEnv.PublicFunctionSource) -Recurse -Filter "*.ps1" -File | Sort-Object Name | ForEach-Object {
-        $Exported += ([System.Management.Automation.Language.Parser]::ParseInput((Get-Content -Path $_.FullName -Raw), [ref]$null, [ref]$null)).FindAll( { $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $false) | ForEach-Object {$_.Name}
+        $Exported += ([System.Management.Automation.Language.Parser]::ParseInput((Get-Content -Path $_.FullName -Raw), [ref]$null, [ref]$null)).FindAll( { $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $false) | ForEach-Object { $_.Name }
     }
 
     if ($Exported.Count -eq 0) {
@@ -202,14 +202,14 @@ task GetPublicFunctions {
 }
 
 # Synopsis: Validate that sensitive strings are not found in your code
-task SanitizeCode -if {$Script:BuildEnv.OptionSanitizeSensitiveTerms} {
+task SanitizeCode -if { $Script:BuildEnv.OptionSanitizeSensitiveTerms } {
     Write-Description White 'Attempting to find sensitive terms in the code' -accent
     $ScratchPath = Join-Path $BuildRoot $Script:BuildEnv.ScratchFolder
     $StageReleasePath = Join-Path $ScratchPath $Script:BuildEnv.BaseReleaseFolder
 
     ForEach ($Term in $Script:BuildEnv.OptionSensitiveTerms) {
         Write-Description White "Checking Files for sensitive string: $Term" -level 2
-        $TermsFound = Get-ChildItem -Path $ScratchPath -Recurse -File | Where-Object {$_.FullName -notlike "$($StageReleasePath)*"} | Select-String -Pattern $Term
+        $TermsFound = Get-ChildItem -Path $ScratchPath -Recurse -File | Where-Object { $_.FullName -notlike "$($StageReleasePath)*" } | Select-String -Pattern $Term
         if ($TermsFound.Count -gt 0) {
             Write-Description white "Sensitive string found in the following files:" -Level 3
             $TermsFound | ForEach-Object {
@@ -228,7 +228,7 @@ task RemoveScriptSignatures {
 
     if ($Script:BuildEnv.OptionCombineFiles) {
         Write-Description White 'Remove script signatures from all files' -Level 2
-        Get-ChildItem -Path "$($ScratchPath)\$($Script:BuildEnv.BaseSourceFolder)" -Recurse -File | ForEach-Object {Remove-MBTSignature -FilePath $_.FullName}
+        Get-ChildItem -Path "$($ScratchPath)\$($Script:BuildEnv.BaseSourceFolder)" -Recurse -File | ForEach-Object { Remove-MBTSignature -FilePath $_.FullName }
     }
 }
 
@@ -249,9 +249,9 @@ task RunMetaTests LoadRequiredModules, {
     Write-Description White 'Running meta tests with Pester' -accent
     $ENV:BuildRoot = $BuildRoot
     $invokePesterParams = @{
-        Strict = $true
-        PassThru = $true
-        Verbose = $false
+        Strict     = $true
+        PassThru   = $true
+        Verbose    = $false
         EnableExit = $false
     }
     $testResults = Invoke-Pester -Tag 'MetaTest' $(Join-Path $BuildRoot 'Tests') @invokePesterParams
@@ -263,9 +263,9 @@ task RunUnitTests LoadRequiredModules, {
     Write-Description White 'Running Unit tests with Pester' -accent
     $ENV:BuildRoot = $BuildRoot
     $invokePesterParams = @{
-        Strict = $true
-        PassThru = $true
-        Verbose = $false
+        Strict     = $true
+        PassThru   = $true
+        Verbose    = $false
         EnableExit = $false
     }
     $testResults = Invoke-Pester -tag 'UnitTest' $(Join-Path $BuildRoot 'Tests') @invokePesterParams
@@ -277,9 +277,9 @@ task RunIntergrationTests LoadRequiredModules, {
     Write-Description White 'Running Intergration tests with Pester' -accent
     $ENV:BuildRoot = $BuildRoot
     $invokePesterParams = @{
-        Strict = $true
-        PassThru = $true
-        Verbose = $false
+        Strict     = $true
+        PassThru   = $true
+        Verbose    = $false
         EnableExit = $false
     }
     $testResults = Invoke-Pester -tag 'IntergrationTest' $(Join-Path $BuildRoot 'Tests') @invokePesterParams
@@ -303,7 +303,7 @@ task CreateMarkdownHelp GetPublicFunctions, {
 
     # If the current module we are building is also loaded as a dependency with PSDepend,
     # Unload it temporally and reload it from the scratchpath to build markdown files from.
-    if (Get-Module $Script:BuildEnv.ModuleToBuild  | Where-Object {$_.Path -like "*PSDepend\$($Script:BuildEnv.ModuleToBuild)*"}) {
+    if (Get-Module $Script:BuildEnv.ModuleToBuild  | Where-Object { $_.Path -like "*PSDepend\$($Script:BuildEnv.ModuleToBuild)*" }) {
         $TempDeload = $true
         #Write-Verbose "$($(Get-Module $Script:BuildEnv.ModuleToBuild).Path)"
         #Get-Command | Where-Object { $_.source -eq 'ModuleBuildTools'} | ForEach-Object {
@@ -398,7 +398,7 @@ task BuildProjectHelpFiles {
 
     # If the current module we are building is also loaded as a dependency with PSDepend,
     # Unload it temporally and reload it from the scratchpath to build markdown files from.
-    if (Get-Module $Script:BuildEnv.ModuleToBuild  | Where-Object {$_.Path -like "*PSDepend\$($Script:BuildEnv.ModuleToBuild)*"}) {
+    if (Get-Module $Script:BuildEnv.ModuleToBuild  | Where-Object { $_.Path -like "*PSDepend\$($Script:BuildEnv.ModuleToBuild)*" }) {
         $TempDeload = $true
         #Write-Verbose "$($(Get-Module $Script:BuildEnv.ModuleToBuild).Path)"
         #Get-Command | Where-Object { $_.source -eq 'ModuleBuildTools'} | ForEach-Object {
@@ -437,7 +437,7 @@ task AddAdditionalDocFiles {
 }
 
 # Synopsis: Update ReadTheDocs project documentation
-task UpdateReadTheDocs -if {$Script:BuildEnv.OptionGenerateReadTheDocs} {
+task UpdateReadTheDocs -if { $Script:BuildEnv.OptionGenerateReadTheDocs } {
     Write-Description White 'Copy ReadTheDocs markdown files to project root document folder' -accent
 
     $BuildDocsPath = Join-Path $BuildRoot "$($Script:BuildEnv.BuildToolFolder)\docs\"
@@ -454,7 +454,7 @@ task UpdateReadTheDocs -if {$Script:BuildEnv.OptionGenerateReadTheDocs} {
 }
 
 # Synopsis: Build ReadTheDocs yml file
-task CreateReadTheDocsYML -if {$Script:BuildEnv.OptionGenerateReadTheDocs} Configure, {
+task CreateReadTheDocsYML -if { $Script:BuildEnv.OptionGenerateReadTheDocs } Configure, {
     Write-Description White 'Create ReadTheDocs definition file and saving to the root project site.' -accent
 
     $DocsReleasePath = Join-Path $Script:BuildEnv.BaseReleaseFolder $Script:BuildEnv.ModuleToBuild
@@ -469,7 +469,7 @@ task CreateReadTheDocsYML -if {$Script:BuildEnv.OptionGenerateReadTheDocs} Confi
         $RTDPages = Get-ChildItem -Path $ProjectDocsPath -File -Filter '*.md' | Sort-Object -Property Name
 
         ForEach ($RTDPage in $RTDPages) {
-            $Pages += @{$RTDPage.BaseName = $RTDPage.Name}
+            $Pages += @{$RTDPage.BaseName = $RTDPage.Name }
         }
 
         ForEach ($RTDFolder in $RTDFolders) {
@@ -477,23 +477,23 @@ task CreateReadTheDocsYML -if {$Script:BuildEnv.OptionGenerateReadTheDocs} Confi
             if ($RTDocs.Count -gt 1) {
                 $NewSection = @()
                 Foreach ($RTDDoc in $RTDocs) {
-                    $NewSection += @{$RTDDoc.Basename = "$($RTDFolder.Name)/$($RTDDoc.Name)"}
+                    $NewSection += @{$RTDDoc.Basename = "$($RTDFolder.Name)/$($RTDDoc.Name)" }
                 }
-                $Pages += @{$RTDFolder.Name = $NewSection}
+                $Pages += @{$RTDFolder.Name = $NewSection }
             }
             else {
-                $Pages += @{$RTDFolder.Name = "$($RTDFolder.Name)/$($RTDocs.Name)"}
+                $Pages += @{$RTDFolder.Name = "$($RTDFolder.Name)/$($RTDocs.Name)" }
             }
         }
 
         $RTD = @{
-            site_author = $Script:BuildEnv.ModuleAuthor
-            site_name = "$($Script:BuildEnv.ModuleToBuild) Docs"
-            repo_url = $Script:BuildEnv.ModuleWebsite
+            site_author        = $Script:BuildEnv.ModuleAuthor
+            site_name          = "$($Script:BuildEnv.ModuleToBuild) Docs"
+            repo_url           = $Script:BuildEnv.ModuleWebsite
             use_directory_urls = $false
-            theme = "readthedocs"
-            copyright = "$($Script:BuildEnv.ModuleToBuild) is licensed under <a href='$($Script:BuildEnv.ModuleWebsite)/blob/master/License.md'>this</a> license"
-            pages = $Pages
+            theme              = "readthedocs"
+            copyright          = "$($Script:BuildEnv.ModuleToBuild) is licensed under <a href='$($Script:BuildEnv.ModuleWebsite)/blob/master/License.md'>this</a> license"
+            pages              = $Pages
         }
 
         $RTD | ConvertTo-Yaml | Out-File -Encoding $Script:BuildEnv.Encoding -FilePath $YMLFile -Force
@@ -547,10 +547,10 @@ task InsertCBHInPublicFunctions {
         $CBH = $currscript | New-MBTCommentBasedHelp
         $currscriptblock = [scriptblock]::Create($currscript)
         . $currscriptblock
-        if([string]::IsNullOrEmpty($CBH))
-        {
+        if ([string]::IsNullOrEmpty($CBH)) {
             Write-Error "Could not Add CBH, possibly duo having no parameters in $filename" -ErrorAction Stop
-        } else {
+        }
+        else {
             $currfunct = get-command $CBH.FunctionName
             if ($currfunct.definition -notmatch $CBHPattern) {
                 $CBHUpdates++
@@ -663,7 +663,7 @@ task CreateModuleManifest CreateModulePSM1, {
     Update-ModuleManifest -Path $PSD1OutputFile -FunctionsToExport $Script:FunctionsToExport
 }
 # Synopsis: Run PSScriptAnalyzer against the assembled module
-task AnalyzeModuleRelease -if {$Script:BuildEnv.OptionAnalyzeCode} {
+task AnalyzeModuleRelease -if { $Script:BuildEnv.OptionAnalyzeCode } {
     Write-Description White 'Analyzing the project with ScriptAnalyzer' -accent
     $StageReleasePath = Join-Path (Join-Path $BuildRoot $Script:BuildEnv.ScratchFolder) $Script:BuildEnv.BaseReleaseFolder
     $Analysis = Invoke-ScriptAnalyzer -Path $StageReleasePath -Settings (Join-Path $BuildRoot "PSScriptAnalyzerSettings.psd1")
@@ -697,7 +697,7 @@ task PushCurrentRelease {
     $ThisBuildCurrentReleasePath = ".\$($Script:BuildEnv.BaseReleaseFolder)\$($Script:BuildEnv.ModuleToBuild)"
     $StageReleasePath = Join-Path (Join-Path $BuildRoot $Script:BuildEnv.ScratchFolder) $Script:BuildEnv.BaseReleaseFolder
 
-    $MostRecentRelease = (Get-ChildItem $ReleasePath -Directory | Where-Object {$_.Name -like "*.*.*"} | Select-Object Name).name | ForEach-Object {[version]$_} | Sort-Object -Descending | Select-Object -First 1
+    $MostRecentRelease = (Get-ChildItem $ReleasePath -Directory | Where-Object { $_.Name -like "*.*.*" } | Select-Object Name).name | ForEach-Object { [version]$_ } | Sort-Object -Descending | Select-Object -First 1
     $ProcessCurrentRelease = $true
     if ($MostRecentRelease) {
         if ($MostRecentRelease -gt [version]$Script:BuildEnv.ModuleVersion) {
@@ -800,7 +800,7 @@ task NewVersion LoadRequiredModules, LoadModuleManifest, {
     Write-Description White 'Updating module build version' -accent
     $ModuleManifestFullPath = Join-Path $BuildRoot "$($Script:BuildEnv.ModuleToBuild).psd1"
     $ReleasePath = Join-Path $BuildRoot $Script:BuildEnv.BaseReleaseFolder
-    $AllReleases = @((Get-ChildItem $ReleasePath -Directory | Where-Object {$_.Name -match '^([0-9].[0-9].[0-9])$'} | Select-Object).Name | ForEach-Object {[version]$_})
+    $AllReleases = @((Get-ChildItem $ReleasePath -Directory | Where-Object { $_.Name -match '^([0-9].[0-9].[0-9])$' } | Select-Object).Name | ForEach-Object { [version]$_ })
 
     # if a new version wasn't passed as a parameter then prompt for one
     if ($null -eq $NewVersion) {
@@ -855,12 +855,12 @@ task UpdateRelease NewVersion, LoadRequiredModules, LoadModuleManifest, {
 }
 
 # Synopsis: Update the current build patch version
-task AutoIncreaseVersionBuildLevel -after PublishPSGallery -if {$Script:BuildEnv.OptionUpdateVersionAfterPublishing} {
+task AutoIncreaseVersionBuildLevel -after PublishPSGallery -if { $Script:BuildEnv.OptionUpdateVersionAfterPublishing } {
     Write-Description White 'Attempting to update the module build version' -accent
 
     $ModuleManifestFullPath = Join-Path $BuildRoot "$($Script:BuildEnv.ModuleToBuild).psd1"
     $ReleasePath = Join-Path $BuildRoot $Script:BuildEnv.BaseReleaseFolder
-    $AllReleases = @((Get-ChildItem $ReleasePath -Directory | Where-Object {$_.Name -match '^([0-9].[0-9].[0-9])$'} | Select-Object).Name | ForEach-Object {[version]$_})
+    $AllReleases = @((Get-ChildItem $ReleasePath -Directory | Where-Object { $_.Name -match '^([0-9].[0-9].[0-9])$' } | Select-Object).Name | ForEach-Object { [version]$_ })
 
     $NewestRelease = $AllReleases | Sort-Object -Descending | Select-Object -First 1
     $ProposedNewRelease = [version]("$($NewestRelease.Major).$($NewestRelease.Minor).$($NewestRelease.Build + 1)")
@@ -887,10 +887,10 @@ task AutoIncreaseVersionBuildLevel -after PublishPSGallery -if {$Script:BuildEnv
 task GithubPush VersionCheck, {
     exec { git add . }
     if ($ReleaseNotes -ne $null) {
-        exec { git commit -m "$ReleaseNotes"}
+        exec { git commit -m "$ReleaseNotes" }
     }
     else {
-        exec { git commit -m "$($Script:BuildEnv.ModuleVersion)"}
+        exec { git commit -m "$($Script:BuildEnv.ModuleVersion)" }
     }
     exec { git push origin master }
     $changes = exec { git status --short }

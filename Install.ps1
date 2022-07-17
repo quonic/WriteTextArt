@@ -11,11 +11,11 @@ $webclient = New-Object System.Net.WebClient
 $file = "$($env:TEMP)\$($ModuleName).zip"
 
 Write-Host "Downloading latest version of $ModuleName from $DownloadURL" -ForegroundColor Cyan
-$webclient.DownloadFile($DownloadURL,$file)
+$webclient.DownloadFile($DownloadURL, $file)
 Write-Host "File saved to $file" -ForegroundColor Green
 $targetondisk = "$($env:USERPROFILE)\Documents\WindowsPowerShell\Modules\$($ModuleName)"
 $null = New-Item -ItemType Directory -Force -Path $targetondisk
-$shell_app=new-object -com shell.application
+$shell_app = new-object -com shell.application
 $zip_file = $shell_app.namespace($file)
 Write-Host "Uncompressing the Zip file to $($targetondisk)" -ForegroundColor Cyan
 $destination = $shell_app.namespace($targetondisk)

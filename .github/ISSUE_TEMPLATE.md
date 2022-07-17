@@ -1,5 +1,5 @@
-Thank you for opening an issue on WriteTextArt.  To
-improve the speed of resolution please review the following guidelines and
+Thank you for opening an issue on WriteTextArt.
+To improve the speed of resolution please review the following guidelines and
 common troubleshooting steps below before creating the issue:
 
 - **If following a tutorial or guide be sure you didn't miss a step.** Carefully

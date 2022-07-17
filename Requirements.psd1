@@ -1,7 +1,7 @@
 @{
     InvokeBuild = @{
         version = 'latest'
-        source = 'PSGalleryModule'
-        target = 'CurrentUser'
+        source  = 'PSGalleryModule'
+        target  = 'CurrentUser'
     }
 }
