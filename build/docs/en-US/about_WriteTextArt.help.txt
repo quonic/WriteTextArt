@@ -1,0 +1,17 @@
+TOPIC
+    about_WriteTextArt
+
+SHORT DESCRIPTION
+    A collection of cmdlets to spice up your text output
+
+LONG DESCRIPTION
+    A collection of cmdlets to spice up your text output
+
+EXAMPLES
+    TBD
+
+KEYWORDS
+    Write
+
+SEE ALSO
+    https://github.com/quonic/WriteTextArt
