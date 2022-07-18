@@ -114,6 +114,7 @@ task LoadModule {
         $Script:Module = Import-Module $ModuleFullPath -Force -PassThru
     }
     catch {
+        Write-Error $_
         throw "Unable to load the project module: $($ModuleFullPath)"
     }
 }
