@@ -50,7 +50,7 @@ if ($Script:BuildEnv.OptionTranscriptEnabled) {
 #Synopsis: Validate system requirements are met
 task ValidateRequirements {
     Write-Description White 'Validating System Requirements for Build' -accent
-    assert ($PSVersionTable.PSVersion.Major.ToString() -eq '5') 'Powershell 5 is required for this build to function properly (you can comment this assert out if you are able to work around this requirement)'
+    $PSVersionTable.PSVersion.Major.ToString() | Should -BeLike '5'
 }
 
 # Synopsis: Run pre-build scripts (such as other builds)
@@ -70,7 +70,14 @@ task LoadModuleManifest {
     Write-Description White 'Loading the existing module manifest for this module' -accent
 
     $ModuleManifestFullPath = Join-Path $BuildRoot "$($Script:BuildEnv.ModuleToBuild).psd1"
-    assert (test-path $ModuleManifestFullPath) "Unable to locate the module manifest file: $ModuleManifestFullPath"
+    $TP = if ($(Test-Path $ModuleManifestFullPath)) {
+        $True
+    }
+    else {
+        $False
+        Write-Error "Unable to locate the module manifest file: $ModuleManifestFullPath"
+    }
+    $TP | Should -Be $True
     $Script:Manifest = Test-ModuleManifest -Path $ModuleManifestFullPath
 }
 
@@ -110,7 +117,11 @@ task LoadModule {
 task VersionCheck LoadModuleManifest, {
     Write-Description White 'Validating manifest, build, and gallery module versions.' -accent
 
-    assert ( ($Script:Manifest).Version.ToString() -eq (($Script:BuildEnv.ModuleVersion)) ) "The module manifest version ( $(($Script:Manifest).Version.ToString()) ) and release version ($($Script:BuildEnv.ModuleVersion)) are mismatched. These must be the same before continuing. Consider running the UpdateRelease task to make the module manifest version the same as the release version."
+    ($Script:Manifest).Version.ToString() | Should -Be $Script:BuildEnv.ModuleVersion
+    if (($Script:Manifest).Version.ToString() -ne (($Script:BuildEnv.ModuleVersion))) {
+        Write-Error "The module manifest version ( $(($Script:Manifest).Version.ToString()) ) and release version ($($Script:BuildEnv.ModuleVersion)) are mismatched. These must be the same before continuing. Consider running the UpdateRelease task to make the module manifest version the same as the release version."
+    }
+
     Write-Description White 'Manifest version and the release version in the build configuration file are the same.' -Level 2
     $GalleryVersion = find-module ($Script:BuildEnv.ModuleToBuild) -ErrorAction:SilentlyContinue
     if ($null -ne $GalleryVersion) {
@@ -249,42 +260,43 @@ task RunMetaTests LoadRequiredModules, {
     Write-Description White 'Running meta tests with Pester' -accent
     $ENV:BuildRoot = $BuildRoot
     $invokePesterParams = @{
-        Strict     = $true
+        # Strict     = $true
         PassThru   = $true
         Verbose    = $false
         EnableExit = $false
     }
-    $testResults = Invoke-Pester -Tag 'MetaTest' $(Join-Path $BuildRoot 'Tests') @invokePesterParams
+    $testResults = Invoke-Pester -Tag 'MetaTest' -Path $(Join-Path $BuildRoot 'Tests') @invokePesterParams
     $numberFails = $testResults.FailedCount
-    assert($numberFails -eq 0) ('Failed "{0}" meta tests.' -f $numberFails)
+
+    $numberFails | Should -Be 0
 }
 
 task RunUnitTests LoadRequiredModules, {
     Write-Description White 'Running Unit tests with Pester' -accent
     $ENV:BuildRoot = $BuildRoot
     $invokePesterParams = @{
-        Strict     = $true
+        # Strict     = $true
         PassThru   = $true
         Verbose    = $false
         EnableExit = $false
     }
-    $testResults = Invoke-Pester -tag 'UnitTest' $(Join-Path $BuildRoot 'Tests') @invokePesterParams
+    $testResults = Invoke-Pester -Tag 'UnitTest' -Path $(Join-Path $BuildRoot 'Tests') @invokePesterParams
     $numberFails = $testResults.FailedCount
-    assert($numberFails -eq 0) ('Failed "{0}" unit tests.' -f $numberFails)
+    $numberFails | Should -Be 0
 }
 
 task RunIntergrationTests LoadRequiredModules, {
     Write-Description White 'Running Intergration tests with Pester' -accent
     $ENV:BuildRoot = $BuildRoot
     $invokePesterParams = @{
-        Strict     = $true
+        # Strict     = $true
         PassThru   = $true
         Verbose    = $false
         EnableExit = $false
     }
-    $testResults = Invoke-Pester -tag 'IntergrationTest' $(Join-Path $BuildRoot 'Tests') @invokePesterParams
+    $testResults = Invoke-Pester -Tag 'IntergrationTest' -Path $(Join-Path $BuildRoot 'Tests') @invokePesterParams
     $numberFails = $testResults.FailedCount
-    assert($numberFails -eq 0) ('Failed "{0}" unit tests.' -f $numberFails)
+    $numberFails | Should -Be 0
 }
 #endregion
 
@@ -734,7 +746,7 @@ task PostBuildTasks {
 task InstallModule VersionCheck, {
     Write-Description White "Attempting to install the current module" -accent
     $CurrentModulePath = Join-Path $Script:BuildEnv.BaseReleaseFolder $Script:BuildEnv.ModuleVersion
-    assert (Test-Path $CurrentModulePath) 'The current version module has not been built yet!'
+    (Test-Path $CurrentModulePath) | Should -BeTrue
 
     $MyModulePath = "$((Get-MBTSpecialPath)['MyDocuments'])\WindowsPowerShell\Modules\"
     $ModuleInstallPath = "$($MyModulePath)$($Script:BuildEnv.ModuleToBuild)"
@@ -746,7 +758,10 @@ task InstallModule VersionCheck, {
         else {
             Remove-Item -Path $ModuleInstallPath -Confirm -Recurse
         }
-        assert (-not (Test-Path $ModuleInstallPath)) 'Module already installed and you opted not to remove it. Cancelling install operation!'
+        (-not (Test-Path $ModuleInstallPath)) | Should -BeTrue
+        if ((Test-Path $ModuleInstallPath)) {
+            Write-Error 'Module already installed and you opted not to remove it. Cancelling install operation!'
+        }
     }
 
     Write-Description White "Installing current module:" -Level 2
@@ -760,7 +775,10 @@ task TestImportInstalledModule VersionCheck, {
     Write-Description White "Test importing the current module version $($Script:BuildEnv.ModuleVersion)" -accent
 
     $InstalledModules = @(Get-Module -ListAvailable $Script:BuildEnv.ModuleToBuild)
-    assert ($InstalledModules.Count -gt 0) 'Unable to find that the module is installed!'
+    $InstalledModules.Count | Should -BeGreaterThan 0
+    if ($InstalledModules.Count -eq 0) {
+        Write-Error 'Unable to find that the module is installed!'
+    }
     if ($InstalledModules.Count -gt 1) {
         Write-Warning 'There are multiple installed modules found for this project (shown below). Be aware that this may skew the test results: '
     }
@@ -894,13 +912,19 @@ task GithubPush VersionCheck, {
     }
     exec { git push origin master }
     $changes = exec { git status --short }
-    assert (-not $changes) "Please, commit changes."
+    (-not $changes) | Should -BeTrue
+    if (-not (-not $changes)) {
+        Write-Error "Please, commit changes."
+    }
 }
 
 # Synopsis: Push with a version tag.
 task GitPushRelease VersionCheck, {
     $changes = exec { git status --short }
-    assert (-not $changes) "Please, commit changes."
+    (-not $changes) | Should -BeTrue
+    if (-not (-not $changes)) {
+        Write-Error "Please, commit changes."
+    }
 
     exec { git push }
     exec { git tag -a "v$($Script:BuildEnv.ModuleVersion)" -m "v$($Script:BuildEnv.ModuleVersion)" }
