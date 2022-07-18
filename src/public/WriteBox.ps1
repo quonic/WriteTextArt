@@ -31,9 +31,9 @@ function Write-Box {
     )
 
     begin {
-        $ThickStyle = "█▀███▄█"
-        $ThinStyle = "┌─┐│└─┘"
-        $ThinDoubleStyle = "╔═╗║╚═╝"
+        $ThickStyle = [char]0x2588, [char]0x2580, [char]0x2588, [char]0x2588, [char]0x2588, [char]0x2584, [char]0x2588
+        $ThinStyle = [char]0x250C, [char]0x2500, [char]0x2510, [char]0x2502, [char]0x2514, [char]0x2500, [char]0x2518
+        $ThinDoubleStyle = [char]0x2554, [char]0x2550, [char]0x2557, [char]0x2551, [char]0x255A, [char]0x2550, [char]0x255D
         switch ($Style) {
             "Thick" {
                 $Top = "$($ThickStyle[1])"
