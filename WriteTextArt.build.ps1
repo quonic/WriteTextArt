@@ -37,6 +37,11 @@ else {
     throw "Without a build environment file we are at a loss as to what to do!"
 }
 
+if ((Test-Path -Path $BuildRoot) -eq $false -and $(Test-Path -Path "C:\projects\$($Script:BuildEnv.ModuleToBuild)\")) {
+    # Appveyor fix
+    $BuildRoot = "C:\projects\$($Script:BuildEnv.ModuleToBuild)\"
+}
+
 if ($Script:BuildEnv.OptionTranscriptEnabled) {
     Write-Output 'Transcript logging: TRUE'
     $BuildToolPath = Join-Path $BuildRoot $Script:BuildEnv.BuildToolFolder
