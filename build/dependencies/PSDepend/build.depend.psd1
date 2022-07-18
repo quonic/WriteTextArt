@@ -4,15 +4,19 @@
         AddToPath = $True
     }
     PSScriptAnalyzer  = @{
-        version = '1.18.3'
+        version = '1.20.0'
+        source  = 'PSGalleryModule'
+    }
+    Assert            = @{
+        version = '0.9.5'
         source  = 'PSGalleryModule'
     }
     PlatyPS           = @{
-        version = '0.14.0'
+        version = '0.14.2'
         source  = 'PSGalleryModule'
     }
     'Powershell-YAML' = @{
-        version = '0.4.1'
+        version = '0.4.2'
         source  = 'PSGalleryModule'
     }
     PSCodeHealth      = @{
